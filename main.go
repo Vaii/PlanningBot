@@ -95,14 +95,14 @@ func SignUpForEvent(user *tgbotapi.User, message string, bot *tgbotapi.BotAPI, C
 
 	text := strings.Split(message, " ")
 
-	for _, x := range Events {
+	for n, x := range Events {
 		if x.Description == text[1] {
-			x.Participants = append(x.Participants, user.UserName)
-
+			Events[n].Participants = append(Events[n].Participants, user.UserName)
 			msg := tgbotapi.NewMessage(ChatID, "Je hebt je ingeschreven voor het evenement!")
 			bot.Send(msg)
 		}
 	}
+
 }
 
 //CountdownEvent :: Calculates the amount of hours remaining for a requested event.
@@ -162,6 +162,7 @@ func PlanEvent(command string, ChatID int64, bot *tgbotapi.BotAPI) {
 
 		newEvent.Description = textInfo[1]
 		newEvent.Date, _ = time.Parse("2006-01-02", textInfo[2])
+		newEvent.Participants = []string{}
 
 		Events = append(Events, newEvent)
 

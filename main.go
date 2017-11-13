@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 var commands = []string{
 	"/plan",
 	"/events",
+	"/countdown",
 }
 
 //Events :: Declare array for Events
@@ -48,11 +50,6 @@ func main() {
 
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
-		//t3 := time.Until(t)
-
-		//t2 := t3.Hours()
-		//t4 := strconv.FormatFloat(t2, 'f', 0, 64)
-
 		if MessageType == "chat" {
 		}
 		if MessageType == "command" {
@@ -75,6 +72,26 @@ func ProcessCommand(command string, ChatID int64, bot *tgbotapi.BotAPI) {
 		msg := tgbotapi.NewMessage(ChatID, ShowEvents())
 		bot.Send(msg)
 	}
+
+	if strings.Contains(command, "/countdown") {
+		CountdownEvent(command, ChatID, bot)
+	}
+}
+
+//CountdownEvent :: Calculates the amount of hours remaining for a requested event.
+func CountdownEvent(command string, ChatID int64, bot *tgbotapi.BotAPI) {
+
+	text := strings.Split(command, " ")
+
+	for _, x := range Events {
+		if x.Description == text[1] {
+			t := time.Until(x.Date)
+
+			msg := tgbotapi.NewMessage(ChatID, "Het is nog "+strconv.FormatFloat(t.Hours(), 'f', 0, 64)+" uur tot "+x.Description)
+			bot.Send(msg)
+		}
+	}
+
 }
 
 //ShowEvents :: Gets all the currently planned events and returns them in a string to display
@@ -111,6 +128,7 @@ func PlanEvent(command string, ChatID int64, bot *tgbotapi.BotAPI) {
 	}
 }
 
+//messageType :: Checks if the sent message is a regular chat message or a command
 func messageType(msg string) string {
 
 	command := getCommand(msg)
@@ -123,6 +141,7 @@ func messageType(msg string) string {
 	return "chat"
 }
 
+//getCommand :: splits the text to return the command
 func getCommand(msg string) []string {
 
 	command := strings.Split(msg, " ")[:1]
